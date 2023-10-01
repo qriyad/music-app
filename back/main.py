@@ -12,6 +12,10 @@ engine = create_engine(DATABASE_URL, echo=True)
 
 SQLModel.metadata.create_all(engine)
 
+@app.get('/')
+async def read_root():
+    return 'Hello World'
+
 def get_db():
     with Session(engine) as db:
         yield db
