@@ -35,7 +35,5 @@ class Song(SQLModel, table=True):
     favourites: List["Favourite"] = Relationship(back_populates="song")
 
 class Favourite(SQLModel, table=True):
-    user_id: int = Field(primary_key=True, index=True, foreign_key="user.id")
-    song_id: int = Field(primary_key=True, index=True, foreign_key="song.id")
     user: User = Relationship(back_populates="favourites")
     song: Song = Relationship(back_populates="favourites")
