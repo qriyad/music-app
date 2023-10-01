@@ -11,7 +11,7 @@ class User(SQLModel, table=True):
     password: str
     playlists: List["Playlist"] = Relationship(back_populates="user")
     songs: List["Song"] = Relationship(back_populates="user")
-    favourites: List["Favourite"] = Relationship(back_populates="user")
+    # favourites: List["Favourite"] = Relationship(back_populates="user")
 
 class Playlist(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True, index=True)
@@ -32,8 +32,9 @@ class Song(SQLModel, table=True):
     duration: str
     user: User = Relationship(back_populates="songs")
     playlist: Playlist = Relationship(back_populates="songs")
-    favourites: List["Favourite"] = Relationship(back_populates="song")
-
+    # favourites: List["Favourite"] = Relationship(back_populates="song")
+"""
 class Favourite(SQLModel, table=True):
     user: User = Relationship(back_populates="favourites")
     song: Song = Relationship(back_populates="favourites")
+"""
