@@ -1,13 +1,14 @@
-from fastapi import Depends, FastAPI, HTTPException,status
+from fastapi import Depends, FastAPI, HTTPException,status, File, UploadFile
 from sqlmodel import SQLModel, Session, create_engine,select
 from fastapi.middleware.cors import CORSMiddleware
-from models import User, Song, Playlist, Favourite
+from models import User, Song, Playlist
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel
 import os
+import threading
 
 secret_key = os.getenv("secret_key")
 ALGORITHM = "HS256"
@@ -24,9 +25,13 @@ engine = create_engine(DATABASE_URL, echo=True)
  
 SQLModel.metadata.create_all(engine)
  
+thread_local = threading.local()
+
 def get_db():
-    with Session(engine) as db:
-        yield db
+    if not hasattr(thread_local, "session"):
+        thread_local.session = Session(engine)
+    return thread_local.session
+
  
 def verify_password(plain_pass, hashed_pass):
     return pwd_context.verify(plain_pass,hashed_pass)
@@ -60,16 +65,26 @@ class TokenData(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 @app.post('/users/', response_model=User, tags=['Users'])
 async def create_user(user: User, db: Session = Depends(get_db)):
-    statement = select(User).where(User.email == user.email)
+    statement = select(User).where(User.username == user.username)
     db_user = db.exec(statement).first()
     if db_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
-    db.add(user)
+    
+    new_user = User(
+        name=user.name,
+        surname=user.surname,
+        username=user.username,
+        password=user.password,  
+        create_date=user.create_date
+    )
+    db.add(new_user)
     db.commit()
-    db.refresh(user)
-    return 'User Created succsessfully'
+    db.refresh(new_user)
+    os.mkdir(f'users/{user.username}')
+    return 'User Created successfully'
 
 @app.get("/users/{user_id}", response_model=User, tags=['Users'])
 async def read_user(user_id: int, db: Session = Depends(get_db)):
@@ -101,18 +116,24 @@ async def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(db_user)
     db.commit()
     return 'User Removed Succsessfully'
-"""
-@app.post('/schedules/', response_model=Schedule, tags=['Schedules'])
-async def create_schedule(schedule: Schedule, db: Session = Depends(get_db)):
-    user = db.get(User, schedule.user_id)
+
+@app.post('/upload_song/{username}/')
+async def upload_song(username: str,playlist_id: int,duration: str, song_f: UploadFile = File(None), db: Session = Depends(get_db)):
+    user = db.query(User).filter_by(username=username).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    note = db.get(Note, schedule.note_id)  
-    if not note:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
-    db_schedule = Schedule.from_orm(schedule)
-    db.add(db_schedule)
+    
+    path = f"users/{username}/{song_f.filename}"
+    with open(path, "wb+") as f:
+        f.write(song_f.file.read())
+
+    song = Song(
+        title=path, 
+        duration=duration,
+        playlist_id=playlist_id, 
+        user_id=user.id
+    )
+    db.add(song)
     db.commit()
-    db.refresh(db_schedule)
-    return db_schedule
-"""
+    
+    return {"filename": song_f.filename, "user": username}
