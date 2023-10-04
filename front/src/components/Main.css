@@ -1,0 +1,88 @@
+.div{
+    height: 100%;
+    border: 1px solid black;
+    background: linear-gradient(to bottom, rgba(100, 5, 100, 0.89),rgba(0, 0, 0,0.90),rgba(100, 5,100,0.89));
+    width: 1420px;
+}
+.Nav {
+    height: 140px;
+    position: relative;
+    top:-10px;
+}
+
+.Nav .center {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 10px;
+    margin-left: 100px;
+    width: 280px;
+    height: 55px;
+   
+}
+
+.Nav .center p {
+    font-size: 36px;
+    position: relative;
+    bottom: -35px;
+    right: -20px;
+    color: white;
+}
+.Nav .center p:hover {
+    color: royalblue;
+    transition: 0.3s;
+}
+.Nav .links {
+    display: flex;
+    justify-content: space-around;
+    width: 650px;
+    position: relative;
+    height: 55px;
+    margin-left: 400px;
+}
+
+.Nav .links p {
+    position: relative;
+    top: -10px;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+
+}
+.Nav .links p:hover {
+    color: royalblue;
+    transition: 0.3s;
+}
+.Nav .link{
+    margin-left: 1050px;
+    position: relative;
+    top: -70px;
+}
+.Nav .link .Button{
+    margin-left: 100px;
+}
+.header{
+    height: 598px;
+}
+.header .text{
+    position: relative;
+    top: -10px;
+    height: 300px;
+}
+.header .text p{
+  color: white;
+  font-size: 50px;
+  margin-left: 150px;
+  position: relative;
+  bottom: -100px;
+}
+.header .text2{
+    height: 308px;
+    position: relative;
+    top: -10px;
+}
+.header .text2 img{
+    height:300px;
+    position: relative;
+    right: -1000px;
+    top: -250px;
+}
